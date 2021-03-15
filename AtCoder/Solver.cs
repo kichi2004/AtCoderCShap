@@ -20,10 +20,8 @@ using static System.Math;
 
 namespace Solve {
     public partial class Solver {
-        public void Main() {
-            
-            
-            
+        public unsafe void Main() {
+            int n = Int.read();
         }
 
         public const long MOD = 1000000007;
@@ -100,6 +98,10 @@ namespace Solve {
             Assert(n < 31, "n must be less than 31.");
             var range = Range(n).ToArray();
             for (int s = 0; s < 1 << n; s++) yield return Array.ConvertAll(range, i => (s & (1 << i)) > 0);
+        }
+        public static IEnumerable<T[]> AllSubsets<T>(T[] array) {
+            foreach (bool[] subset in AllSubsets(array.Length))
+                yield return subset.Select((x, i) => (f: x, i)).Where(x => x.f).Select(x => array[x.i]).ToArray();
         }
         public static long BinarySearch(long low, long high, Func<long, bool> expression) {
             while (low < high) {
@@ -263,6 +265,8 @@ namespace Solve {
         }
         [MethodImpl(256)] public static int bit(in int x) => 1 << x;
         [MethodImpl(256)] public static long bitl(in int x) => 1L << x;
+
+        public static (T, U)[] Zip<T, U>(this (T[], U[]) arrays) => arrays.Item1.Zip(arrays.Item2).ToArray();
     }
     public class UnorderedMap<T, U> : Dictionary<T, U>
     {
@@ -286,43 +290,60 @@ namespace Solve {
                 base[k] = value;
         }
     }
-    public class Scanner<T>
-    {
-        public T r => next<T>();
-        public T next() => r;
 
-        IEnumerable<T> enumerable(int N) { for (int i = 0; i < N; ++i) yield return r; }
+    public class Scanner<T> {
+        public Scanner() {
+            _deconstructer = new Deconstructer(this);
+        }
+        public readonly struct Deconstructer {
+            public Deconstructer(Scanner<T> scanner) => _sc = scanner;
+            
+            readonly Scanner<T> _sc;
 
-        public T[] array(in int N) => enumerable(N).ToArray();
-        public List<T> list(in int N) => enumerable(N).ToList();
-        public T[,] array2d(in int N, in int M) => next2DArray<T>(N, M);
-        public T[][] listArray(in int n) {
-            var ret = new T[n][];
-            for (int i = 0; i < n; i++) ret[i] = array(next<int>());
-            return ret;
+            public void Deconstruct(out T _1, out T _2) => (_1, _2) = (_sc.read(), _sc.read());
+            public void Deconstruct(out T _1, out T _2, out T _3) => (_1, _2, _3) = (_sc.read(), _sc.read(), _sc.read());
+            public void Deconstruct(out T _1, out T _2, out T _3, out T _4) =>
+                (_1, _2, _3, _4) = (_sc.read(), _sc.read(), _sc.read(), _sc.read());
+            public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5) =>
+                (_1, _2, _3, _4, _5) = (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+            public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5, out T _6) =>
+                (_1, _2, _3, _4, _5, _6) = (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+            public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5, out T _6, out T _7) =>
+                (_1, _2, _3, _4, _5, _6, _7) =
+                (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+            public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5, out T _6, out T _7, out T _8) =>
+                (_1, _2, _3, _4, _5, _6, _7, _8) = 
+                (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+            public void Deconstruct(out T _1, out T _2, out T _3, out T _4,
+                out T _5, out T _6, out T _7, out T _8, out T _9) =>
+                (_1, _2, _3, _4, _5, _6, _7, _8, _9) =
+                (_sc.read(), _sc.read(), _sc.read(), _sc.read(), 
+                    _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+            public void Deconstruct(out T _1, out T _2, out T _3, out T _4, 
+                out T _5, out T _6, out T _7, out T _8, out T _9, out T _10) =>
+                (_1, _2, _3, _4, _5, _6, _7, _8, _9, _10) = 
+                (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(),
+                    _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
         }
 
-        public void Deconstruct(out T _1, out T _2) => (_1, _2) = (r, r);
-        public void Deconstruct(out T _1, out T _2, out T _3) => (_1, _2, _3) = (r, r, r);
-        public void Deconstruct(out T _1, out T _2, out T _3, out T _4) =>
-            (_1, _2, _3, _4) = (r, r, r, r);
-        public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5) =>
-            (_1, _2, _3, _4, _5) = (r, r, r, r, r);
-        public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5, out T _6) =>
-            (_1, _2, _3, _4, _5, _6) = (r, r, r, r, r, r);
-        public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5, out T _6, out T _7) =>
-            (_1, _2, _3, _4, _5, _6, _7) = (r, r, r, r, r, r, r);
-        public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5, out T _6, out T _7, out T _8) =>
-            (_1, _2, _3, _4, _5, _6, _7, _8) = (r, r, r, r, r, r, r, r);
-        public void Deconstruct(out T _1, out T _2, out T _3, out T _4, 
-            out T _5, out T _6, out T _7, out T _8, out T _9) =>
-            (_1, _2, _3, _4, _5, _6, _7, _8, _9) = (r, r, r, r, r, r, r, r, r);
-        public void Deconstruct(out T _1, out T _2, out T _3, out T _4,
-            out T _5, out T _6, out T _7, out T _8, out T _9, out T _10) =>
-            (_1, _2, _3, _4, _5, _6, _7, _8, _9, _10) = (r, r, r, r, r, r, r, r, r, r);
-        
-        public static implicit operator T(Scanner<T> sc) => sc.r;
+        readonly Deconstructer _deconstructer;
+
+        public T next() => read();
+        public T read() => next<T>();
+        public Deconstructer readMulti() => _deconstructer;
+        IEnumerable<T> enumerable(int N) {
+            for (int i = 0; i < N; ++i) yield return read();
+        }
+        public T[] readArray(in int N) => enumerable(N).ToArray();
+        public List<T> readList(in int N) => enumerable(N).ToList();
+        public T[,] readArray2d(in int N, in int M) => next2DArray<T>(N, M);
+        public T[][] readListArray(in int n) {
+            var ret = new T[n][];
+            for (int i = 0; i < n; i++) ret[i] = readArray(next<int>());
+            return ret;
+        }
     }
+
     public static class Input
     {
         const char _separator = ' ';
@@ -335,39 +356,35 @@ namespace Solve {
 #endif
 
         public static string ReadLine => sr.ReadLine();
-        static string ReadStr => Read;
-        static int ReadInt => int.Parse(Read);
-        static long ReadLong => long.Parse(Read);
-        static ulong ReadULong => ulong.Parse(Read);
-        static double ReadDouble => double.Parse(Read);
-        static BigInteger ReadBigInteger => BigInteger.Parse(Read);
+        static string ReadStr() => next();
+        static int ReadInt() => int.Parse(next());
+        static long ReadLong() => long.Parse(next());
+        static ulong ReadULong() => ulong.Parse(next());
+        static double ReadDouble() => double.Parse(next());
+        static BigInteger ReadBigInteger() => BigInteger.Parse(next());
 
-        public static string Read {
-            get {
-                if (_input.Any()) return _input.Dequeue();
-                foreach (var val in sr.ReadLine().Split(_separator)) _input.Enqueue(val);
-                return _input.Dequeue();
-            }
+        public static string next() {
+            if (_input.Any()) return _input.Dequeue();
+            foreach (var val in sr.ReadLine().Split(_separator)) _input.Enqueue(val);
+            return _input.Dequeue();
         }
-
-        public static string next() => Read;
         public static T next<T>() =>
             default(T) switch {
-                sbyte _ => (T) (object) (sbyte) ReadInt,
-                short _ => (T) (object) (short) ReadInt,
-                int _ => (T) (object) ReadInt,
-                long _ => (T) (object) ReadLong,
-                byte _ => (T) (object) (byte) ReadULong,
-                ushort _ => (T) (object) (ushort) ReadULong,
-                uint _ => (T) (object) (uint) ReadULong,
-                ulong _ => (T) (object) ReadULong,
-                float _ => (T) (object) (float) ReadDouble,
-                double _ => (T) (object) ReadDouble,
-                string _ => (T) (object) ReadStr,
-                char _ => (T) (object) ReadStr[0],
-                BigInteger _ => (T) (object) ReadBigInteger,
+                sbyte _ => (T) (object) (sbyte) ReadInt(),
+                short _ => (T) (object) (short) ReadInt(),
+                int _ => (T) (object) ReadInt(),
+                long _ => (T) (object) ReadLong(),
+                byte _ => (T) (object) (byte) ReadULong(),
+                ushort _ => (T) (object) (ushort) ReadULong(),
+                uint _ => (T) (object) (uint) ReadULong(),
+                ulong _ => (T) (object) ReadULong(),
+                float _ => (T) (object) (float) ReadDouble(),
+                double _ => (T) (object) ReadDouble(),
+                string _ => (T) (object) ReadStr(),
+                char _ => (T) (object) ReadStr()[0],
+                BigInteger _ => (T) (object) ReadBigInteger(),
                 _ => typeof(T) == typeof(string)
-                    ? (T) (object) ReadStr
+                    ? (T) (object) ReadStr()
                     : throw new NotSupportedException(),
             };
         public static (T, U) next<T, U>() => (next<T>(), next<U>());
