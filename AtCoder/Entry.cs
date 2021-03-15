@@ -13,12 +13,12 @@ namespace Solve
                 return;
             }
 
-            Console.ForegroundColor = ConsoleColor.White;
+            var defaultColor = Console.ForegroundColor;
             var sw = new Stopwatch();
             while (true)
             {
                 sw.Restart();
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.ForegroundColor = defaultColor;
                 try
                 {
                     new Solver().Main();
