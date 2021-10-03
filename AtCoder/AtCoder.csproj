@@ -23,5 +23,6 @@
     </ItemGroup>
     <ItemGroup>
       <None Remove="tmp\**" />
+      <None Include="bin\Debug\netcoreapp3.1\test" />
     </ItemGroup>
 </Project>

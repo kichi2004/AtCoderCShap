@@ -1,5 +1,4 @@
 ﻿// ReSharper disable RedundantUsingDirective
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,17 +15,115 @@ using static Solve.Output;
 using static System.Math;
 
 // Resharper restore RedundantUsingDirective
-
+using System;
 
 namespace Solve {
     public partial class Solver {
-        public unsafe void Main() {
-            int n = Int.read();
-        }
+        public int Solve(int H, int W, int S, int[,] A) {
+            // O(HW・Amax + 2^{Amax}Amax)
+            var aMax = 0;
+            for (int i = 0; i < H; i++)
+            for (int j = 0; j < W; j++)
+                chmax(ref aMax, A[i, j]);
+            
+            if (aMax <= 15){
+                var list = new (int top, int left, int bottom, int right)[aMax];
+                Array.Fill(list, (H, W, -1, -1));
+                for (int i = 0; i < H; i++) {
+                    for (int j = 0; j < W; j++) {
+                        var a = A[i,j] - 1;
+                        list[a].top.ChangeToMin(i);
+                        list[a].left.ChangeToMin(j);
+                        list[a].bottom.ChangeToMax(i);
+                        list[a].right.ChangeToMax(j);
+                    }
+                }
 
+                var ans = aMax;
+                foreach (var li in AllSubsets(aMax)) {
+                    if (li.All(x => !x)) {
+                        // 全部残す
+                        continue;
+                    }
+
+                    // 集合 b を取り除く
+                    int t = H, l = W, b = -1, r = -1;
+                    var res = aMax;
+                    for (int a = 0; a < aMax; a++) {
+                        if (li[a]) {
+                            --res;
+                            if (list[a].bottom == -1) continue;
+                            t.ChangeToMin(list[a].top);
+                            l.ChangeToMin(list[a].left);
+                            b.ChangeToMax(list[a].bottom);
+                            r.ChangeToMax(list[a].right);
+                        }
+                    }
+
+                    if (b == -1) {
+                        ans.ChangeToMin(res);
+                        continue;
+                    }
+
+                    var del = (b - t + 1) * (r - l + 1);
+                    if (del > S) continue;
+                    ans.ChangeToMin(res);
+                }
+
+                return ans;
+            }
+            
+            if (S == 1) {
+                var count = new int[256];
+                var set = new SortedSet<int>();
+                for (int i = 0; i < H; i++) {
+                    for (int j = 0; j < W; j++) {
+                        ++count[A[i, j] - 1];
+                        set.Add(A[i, j] - 1);
+                    }
+                }
+
+                if (count.Any(x => x == 1)) return set.Count - 1;
+                return set.Count;
+            }
+
+            if (S * W <= S) return 0;
+            if (H <= 10 && W <= 10) {
+                var ans = 257;
+                for (int T = 0; T < H; ++T) {
+                    for (int B = T; B < H; ++B) {
+                        for (int L = 0; L < W; ++L) {
+                            for (int R = L; R < W; ++R) {
+                                var allCount = 0;
+                                var set = new SortedSet<int>();
+                                for (int i = 0; i < H; ++i) {
+                                    for (int j = 0; j < W; ++j) {
+                                        if (T <= i && i <= B && L <= j && j <= R) continue;
+                                        ++allCount;
+                                        set.Add(A[i, j]);
+                                    }
+                                }
+
+                                if (H * W - allCount > S) continue;
+                                ans.ChangeToMin(set.Count);
+                            }
+                        }
+                    }
+                }
+                return ans;
+            }
+
+            return -2;
+        }
+        public void Main() {
+            var (H, W, S) = Int.readMulti();
+            var A = Int.readArray2d(H, W);
+            var ans = Solve(H, W, S, A);
+            if(ans==-2) Environment.Exit(1);
+            print(ans);
+        }
         public const long MOD = 1000000007;
     }
-
 
     public static class Methods
     {
@@ -290,7 +387,7 @@ namespace Solve {
                 base[k] = value;
         }
     }
-
+    
     public class Scanner<T> {
         public Scanner() {
             _deconstructer = new Deconstructer(this);
@@ -343,7 +440,7 @@ namespace Solve {
             return ret;
         }
     }
-
+    
     public static class Input
     {
         const char _separator = ' ';
@@ -504,4 +601,3 @@ namespace Solve {
         public static readonly int[] dx = {-1, 0, 0, 1, -1, -1, 1, 1}, dy = {0, 1, -1, 0, -1, 1, -1, 1};
     }
 }
-
