@@ -8,7 +8,12 @@ namespace Solve.Libraries.UnionFind
     public class UnionFind
     {
         readonly int[] _parent;
-        public UnionFind(int count) { _parent = Enumerable.Repeat(-1, count).ToArray(); }
+        public int TreeCount { get; private set; }
+        public UnionFind(int count)
+        {
+            _parent = Enumerable.Repeat(-1, count).ToArray();
+            TreeCount = count;
+        }
 
         public IEnumerable<int> AllParents =>
             _parent.Select((x, i) => (x, i))
@@ -25,6 +30,7 @@ namespace Solve.Libraries.UnionFind
             _parent[rx] += _parent[ry];
             _parent[ry] = rx;
 
+            --TreeCount;
             return true;
         }
         public bool Same(int x, int y) => Find(x) == Find(y);

@@ -80,5 +80,10 @@ namespace Solve.Libraries.Graph.Graph
                 if (!directed) Graph[b].Add(new UnweightEdge(a));
             }
         }
+        public void AddEdge(int u, int v, in bool directed = true)
+        {
+            Graph[u].Add(new UnweightEdge(v));
+            if (!directed) Graph[v].Add(new UnweightEdge(u));
+        }
     }
 }

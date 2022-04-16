@@ -41,6 +41,8 @@ namespace Solve.Libraries.Set {
 
         public int UpperBound(T v) => BinarySearchTree<T>.UpperBound(_root, v);
 
+        public T FindByIndex(int i) => BinarySearchTree<T>.FindByIndex(_root, i).Value;
+
         public (int, int) EqualRange(T v) =>
             !Contains(v)
                 ? (-1, -1)

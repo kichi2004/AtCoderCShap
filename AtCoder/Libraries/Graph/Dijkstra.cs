@@ -15,7 +15,7 @@ namespace Solve.Libraries.Graph.Dijkstra
             public readonly int Number;
             public int From { get; internal set; }
             public long Cost { get; internal set; }
-            public bool IsReachable => Cost != 1000000000000000100;
+            public bool IsReachable => Cost != INF;
 
             internal Node Copy() => new Node(Number, From, Cost);
             public static bool operator >(Node a, Node b) => a.Cost > b.Cost;

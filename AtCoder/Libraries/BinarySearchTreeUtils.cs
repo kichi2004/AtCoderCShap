@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using static Solve.Libraries.BinarySearchTreeUtils.RandomWrapper;
 
 namespace Solve.Libraries.BinarySearchTreeUtils {
     public static class RandomWrapper {
-        public static readonly Random rnd = new Random();
+        public static readonly Random Rnd = new Random();
+        public static double NextDouble() => Rnd.NextDouble();
     }
     
     public static class BinarySearchTree<T> where T : IComparable {
@@ -31,7 +31,7 @@ namespace Solve.Libraries.BinarySearchTreeUtils {
         public static Node Merge(Node l, Node r) {
             if (l == null || r == null) return l ?? r;
 
-            if (Count(l) / (double) (Count(l) + Count(r)) > rnd.NextDouble()) {
+            if (Count(l) / (double) (Count(l) + Count(r)) > RandomWrapper.NextDouble()) {
                 l.RChild = Merge(l.RChild, r);
                 return Update(l);
             } else {

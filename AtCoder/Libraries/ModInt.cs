@@ -5,8 +5,8 @@ namespace Solve.Libraries.ModInt
 {
     [DebuggerDisplay("{" + nameof(_value) + "}")]
     public struct ModInt : IEquatable<ModInt>, IComparable<ModInt> {
-        public const int MOD = 1_000_000_007;
-        // public const int MOD = 998_244_353;
+        // public const int MOD = 1_000_000_007;
+        public const int MOD = 998_244_353;
         long _value;
         public static readonly ModInt Zero = new ModInt(0);
         public static readonly ModInt One = new ModInt(1);

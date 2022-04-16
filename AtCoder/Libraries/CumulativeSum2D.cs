@@ -1,6 +1,7 @@
-using Solve;
+using System;
 
 namespace Solve.Libraries.CumulativeSum2D {
+    [Obsolete]
     public class CumulativeSum2D {
         public CumulativeSum2D(long[][] array) : this(array.To2DArray()) { }
 
@@ -23,7 +24,7 @@ namespace Solve.Libraries.CumulativeSum2D {
             Methods.Assert(i1 <= i2);
             Methods.Assert(j1 <= j2);
 
-            return _cumSum[i2, j2] - _cumSum[i1, j2] - _cumSum[j2, i1] + _cumSum[i1, j1];
+            return _cumSum[i2, j2] - _cumSum[i1, j2] - _cumSum[i2, j1] + _cumSum[i1, j1];
         }
     }
 }

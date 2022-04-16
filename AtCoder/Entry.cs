@@ -28,7 +28,7 @@ namespace Solve
                     var stackTrace = 
                         ex.StackTrace.Split('\n')
                             .Where(x => x.Contains("Program.cs"))
-                            .Select(x => x.Replace(@"C:\Users\kichi\Documents\develop\AtCoder\LangUpdateCSharp\LangUpdateCSharp\", ""));
+                            .Select(x => x.Replace(@"C:\Users\kichi\RiderProjects\AtCoderCSharp\", ""));
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine($"入力に失敗しました:\n  {ex.Message}\n{stackTrace.Join("\n")}");
                 }
