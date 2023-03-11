@@ -21,8 +21,8 @@ namespace Solve.Libraries.CumulativeSum2D {
         public long GetSum((int i, int j) x, (int i, int j) y) {
             var (i1, j1) = x;
             var (i2, j2) = y;
-            Methods.Assert(i1 <= i2);
-            Methods.Assert(j1 <= j2);
+            Lib.Assert(i1 <= i2);
+            Lib.Assert(j1 <= j2);
 
             return _cumSum[i2, j2] - _cumSum[i1, j2] - _cumSum[i2, j1] + _cumSum[i1, j1];
         }

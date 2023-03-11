@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Solve.Libraries.ModInt
@@ -13,6 +14,7 @@ namespace Solve.Libraries.ModInt
         public ModInt(in long value) => _value = (value % MOD + MOD) % MOD;
         public int Value => (int) _value;
         public ModInt Invert => ModPow(this, MOD - 2);
+        static List<ModInt> _factMemo = new List<ModInt> { 1, 1 };
         public static ModInt operator -(ModInt value) {
             value._value = MOD - value._value;
             return value;
@@ -51,10 +53,19 @@ namespace Solve.Libraries.ModInt
                     r *= value;
             return r;
         }
-        public static ModInt ModFact(int value) {
-            var r = new ModInt(1);
-            for (var i = 2; i <= value; i++) r *= value;
-            return r;
+        public static ModInt ModFactorial(int value)
+        {
+            if (_factMemo.Count > value) return _factMemo[value];
+            for (int i = _factMemo.Count; i <= value; ++i)
+            {
+                _factMemo.Add(_factMemo[i - 1] * i);
+            }
+            return _factMemo[value];
+        }
+        public static ModInt ModCombination(int n, int r)
+        {
+            if (n < r) return Zero;
+            return ModFactorial(n) / ModFactorial(r) / ModFactorial(n - r);
         }
         public bool Equals(ModInt other) => _value == other._value;
         public override bool Equals(object obj) => obj is ModInt m && Equals(m);

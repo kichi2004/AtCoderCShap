@@ -1,4 +1,6 @@
 ﻿// ReSharper disable RedundantUsingDirective
+#nullable disable
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,14 +12,12 @@ using System.Text;
 using System.Numerics;
 using System.Runtime.Intrinsics.X86;
 using static Solve.Input;
-using static Solve.Methods;
+using static Solve.Lib;
 using static Solve.Output;
 using static System.Math;
 
 // Resharper restore RedundantUsingDirective
 using System;
-
-#nullable disable
 
 // ReSharper disable InconsistentNaming
 
@@ -33,15 +33,14 @@ namespace Solve {
         public const long MOD = 998244353;
     }
 
-    public static class Methods
+    public static class Lib
     {
         [MethodImpl(256)] public static bool Assert(in bool b, in string message = null) =>
             b ? true : throw new Exception(message ?? "Assert failed.");
         [MethodImpl(256)] public static string JoinSpace<T>(this IEnumerable<T> source) => source.Join(" ");
         [MethodImpl(256)] public static string JoinEndline<T>(this IEnumerable<T> source) => source.Join("\n");
         [MethodImpl(256)] public static string Join<T>(this IEnumerable<T> source, string s) => string.Join(s, source);
-        [MethodImpl(256)] public static string Join<T>(this IEnumerable<T> source, char c) =>
-            string.Join(c.ToString(), source);
+        [MethodImpl(256)] public static string Join<T>(this IEnumerable<T> source, char c) => string.Join(c.ToString(), source);
         public static int Gcd(int a, int b) => (int) Gcd((long) a, b);
         public static long Gcd(long a, long b) {
             while (true) {
@@ -56,7 +55,7 @@ namespace Solve {
             for (long i = 2; i * i <= value; ++i) if (value % i == 0) return false;
             return true;
         }
-        public static long Pow(long a, int b) {
+        public static long Pow(long a,  int b) {
             long res = 1;
             while (b > 0) { if (b % 2 != 0) res *= a; a *= a; b >>= 1; }
             return res;
@@ -64,7 +63,12 @@ namespace Solve {
         public static int PowMod(long a, long b, int p) => (int) PowMod(a, b, (long) p);
         public static long PowMod(long a, long b, long p) {
             long res = 1;
-            while (b > 0) { if (b % 2 != 0) res = res * a % p; a = a * a % p; b >>= 1; }
+            while (b > 0) {
+                if (b % 2 != 0) 
+                    res = res * a % p;
+                a = a * a % p;
+                b >>= 1;
+            }
             return res;
         }
         public static IEnumerable<long> Factors(long n) {
@@ -149,10 +153,10 @@ namespace Solve {
         [MethodImpl(256)]
         public static IEnumerable<TResult> Repeat<TResult>(TResult value, int count) => Enumerable.Repeat(value, count);
         [MethodImpl(256)] public static string AsString(this IEnumerable<char> source) => new string(source.ToArray());
-        public static IEnumerable<long> CumSum(this IEnumerable<long> source) {
+        public static IEnumerable<long> CumulativeSum(this IEnumerable<long> source) {
             long sum = 0; foreach (var item in source) yield return sum += item;
         }
-        public static IEnumerable<int> CumSum(this IEnumerable<int> source) {
+        public static IEnumerable<int> CumulativeSum(this IEnumerable<int> source) {
             int sum = 0; foreach (var item in source) yield return sum += item;
         }
         [MethodImpl(256)] public static bool IsIn<T>(this T value, T l, T r) where T : IComparable<T> =>
@@ -223,11 +227,18 @@ namespace Solve {
             for (int i = 0; i < a; ++i) ret[i] = Enumerable.Repeat(defaultValue, b).ToArray();
             return ret;
         }
-        public static T[,] Array2D<T>(int a, int b, T defaultValue = default) {
-            var ret = new T[a, b];
-            for (int i = 0; i < a; ++i) for (int j = 0; j < b; ++j) ret[i, j] = defaultValue;
+        public static T[,] Array2D<T>(int h, int w, T defaultValue = default) {
+            var ret = new T[h, w];
+            for (int i = 0; i < h; ++i) for (int j = 0; j < w; ++j) ret[i, j] = defaultValue;
             return ret;
         }
+
+        public static T[,] Array2D<T>(int h, int w, Func<int, int, T> factory) {
+            var ret = new T[h, w];
+            for (int i = 0; i < h; ++i) for (int j = 0; j < w; ++j) ret[i, j] = factory(i, j);
+            return ret;
+        }
+        
         public static T[,] To2DArray<T>(this T[][] array) {
             if (!array.Any()) return new T[0, 0];
 
@@ -252,26 +263,36 @@ namespace Solve {
             return t.Zip(u, (a, b) => (a, b))
                 .Zip(v, (tuple, c) => (tuple.a, tuple.b, c)).ToArray();
         }
-        [MethodImpl(256)] public static void rep(in int start, in int end, Action<int> func) {
+        [MethodImpl(256)] public static void Repeat(in int start, in int end, Action<int> func) {
             for (int i = start; i < end; ++i) func(i);
         }
-        [MethodImpl(256)] public static void rep(in int end, Action<int> func) => rep(0, end, func);
-        [MethodImpl(256)] public static void rep1(in int end, Action<int> func) => rep(1, end + 1, func);
-        [MethodImpl(256)] public static void repr(in int end, Action<int> func) {
+        [MethodImpl(256)] public static void Repeat(in int end, Action<int> func) => Repeat(0, end, func);
+        [MethodImpl(256)] public static void RepeatClosed(in int end, Action<int> func) => Repeat(1, end + 1, func);
+        [MethodImpl(256)] public static void RepeatReverse(in int end, Action<int> func) {
             for (int i = end - 1; i >= 0; --i) func(i);
         }
         [MethodImpl(256)]
-        public static void each<T>(this IEnumerable<T> source, Action<T> func) {
+        public static void Each<T>(this IEnumerable<T> source, Action<T> func) {
             foreach (var item in source) func(item);
         }
         [MethodImpl(256)]
-        public static void eachWithIndex<T>(this IEnumerable<T> source, Action<T, int> func) {
+        public static void EachWithIndex<T>(this IEnumerable<T> source, Action<T, int> func) {
             int index = 0; foreach (var item in source) func(item, index++);
         }
-        [MethodImpl(256)] public static int bit(in int x) => 1 << x;
-        [MethodImpl(256)] public static long bitl(in int x) => 1L << x;
+        
+        public static IEnumerable<U> Scan<T, U>(this IEnumerable<T> source, U seed, Func<U, T, U> func) {
+            var tmp = seed;
+            foreach (var v in source) yield return func(tmp, v);
+        }
+        
+        [MethodImpl(256)] public static int Bit(in int x) => 1 << x;
+        [MethodImpl(256)] public static long BitLong(in int x) => 1L << x;
 
         public static (T, U)[] Zip<T, U>(this (T[], U[]) arrays) => arrays.Item1.Zip(arrays.Item2).ToArray();
+
+        public static U Pipe<T, U>(this T self, Func<T, U> func) => func(self);
+        public static void Pipe<T>(this T self, Action<T> func) => func(self);
+        
     }
     public class UnorderedMap<T, U> : Dictionary<T, U>
     {
@@ -304,46 +325,46 @@ namespace Solve {
             
             readonly Scanner<T> _sc;
 
-            public void Deconstruct(out T _1, out T _2) => (_1, _2) = (_sc.read(), _sc.read());
-            public void Deconstruct(out T _1, out T _2, out T _3) => (_1, _2, _3) = (_sc.read(), _sc.read(), _sc.read());
+            public void Deconstruct(out T _1, out T _2) => (_1, _2) = (_sc.Read(), _sc.Read());
+            public void Deconstruct(out T _1, out T _2, out T _3) => (_1, _2, _3) = (_sc.Read(), _sc.Read(), _sc.Read());
             public void Deconstruct(out T _1, out T _2, out T _3, out T _4) =>
-                (_1, _2, _3, _4) = (_sc.read(), _sc.read(), _sc.read(), _sc.read());
+                (_1, _2, _3, _4) = (_sc.Read(), _sc.Read(), _sc.Read(), _sc.Read());
             public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5) =>
-                (_1, _2, _3, _4, _5) = (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+                (_1, _2, _3, _4, _5) = (_sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read());
             public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5, out T _6) =>
-                (_1, _2, _3, _4, _5, _6) = (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+                (_1, _2, _3, _4, _5, _6) = (_sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read());
             public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5, out T _6, out T _7) =>
                 (_1, _2, _3, _4, _5, _6, _7) =
-                (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+                (_sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read());
             public void Deconstruct(out T _1, out T _2, out T _3, out T _4, out T _5, out T _6, out T _7, out T _8) =>
                 (_1, _2, _3, _4, _5, _6, _7, _8) = 
-                (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+                (_sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read());
             public void Deconstruct(out T _1, out T _2, out T _3, out T _4,
                 out T _5, out T _6, out T _7, out T _8, out T _9) =>
                 (_1, _2, _3, _4, _5, _6, _7, _8, _9) =
-                (_sc.read(), _sc.read(), _sc.read(), _sc.read(), 
-                    _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+                (_sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), 
+                    _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read());
             public void Deconstruct(out T _1, out T _2, out T _3, out T _4, 
                 out T _5, out T _6, out T _7, out T _8, out T _9, out T _10) =>
                 (_1, _2, _3, _4, _5, _6, _7, _8, _9, _10) = 
-                (_sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read(),
-                    _sc.read(), _sc.read(), _sc.read(), _sc.read(), _sc.read());
+                (_sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(),
+                    _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read());
         }
 
         readonly Deconstructer _deconstructer;
 
-        public T next() => read();
-        public T read() => next<T>();
-        public Deconstructer readMulti() => _deconstructer;
-        IEnumerable<T> enumerable(int N) {
-            for (int i = 0; i < N; ++i) yield return read();
+        public T next() => Read();
+        public T Read() => Next<T>();
+        public Deconstructer ReadMulti() => _deconstructer;
+        IEnumerable<T> Enumerable(int N) {
+            for (int i = 0; i < N; ++i) yield return Read();
         }
-        public T[] readArray(in int N) => enumerable(N).ToArray();
-        public List<T> readList(in int N) => enumerable(N).ToList();
-        public T[,] readArray2d(in int N, in int M) => next2DArray<T>(N, M);
-        public T[][] readListArray(in int n) {
+        public T[] ReadArray(in int N) => Enumerable(N).ToArray();
+        public List<T> ReadList(in int N) => Enumerable(N).ToList();
+        public T[,] ReadArray2d(in int N, in int M) => Next2DArray<T>(N, M);
+        public T[][] ReadListArray(in int n) {
             var ret = new T[n][];
-            for (int i = 0; i < n; i++) ret[i] = readArray(next<int>());
+            for (int i = 0; i < n; i++) ret[i] = ReadArray(Next<int>());
             return ret;
         }
     }
@@ -359,19 +380,19 @@ namespace Solve {
 #endif
 
         public static string ReadLine => sr.ReadLine();
-        static string ReadStr() => next();
-        static int ReadInt() => int.Parse(next());
-        static long ReadLong() => long.Parse(next());
-        static ulong ReadULong() => ulong.Parse(next());
-        static double ReadDouble() => double.Parse(next());
-        static BigInteger ReadBigInteger() => BigInteger.Parse(next());
+        static string ReadStr() => Next();
+        static int ReadInt() => int.Parse(Next());
+        static long ReadLong() => long.Parse(Next());
+        static ulong ReadULong() => ulong.Parse(Next());
+        static double ReadDouble() => double.Parse(Next());
+        static BigInteger ReadBigInteger() => BigInteger.Parse(Next());
 
-        public static string next() {
+        public static string Next() {
             if (_input.Any()) return _input.Dequeue();
             foreach (var val in sr.ReadLine().Split(_separator)) _input.Enqueue(val);
             return _input.Dequeue();
         }
-        public static T next<T>() =>
+        public static T Next<T>() =>
             default(T) switch {
                 sbyte _ => (T) (object) (sbyte) ReadInt(),
                 short _ => (T) (object) (short) ReadInt(),
@@ -390,68 +411,101 @@ namespace Solve {
                     ? (T) (object) ReadStr()
                     : throw new NotSupportedException(),
             };
-        public static (T, U) next<T, U>() => (next<T>(), next<U>());
-        public static (T, U, V) next<T, U, V>() => (next<T>(), next<U>(), next<V>());
-        public static (T, U, V, W) next<T, U, V, W>() => (next<T>(), next<U>(), next<V>(), next<W>());
-        public static (T, U, V, W, X) next<T, U, V, W, X>() => (next<T>(), next<U>(), next<V>(), next<W>(), next<X>());
-        public static T[] nextArray<T>(in int size) {
-            var ret = new T[size]; for (int i = 0; i < size; ++i) ret[i] = next<T>(); return ret;
+        public static (T, U) Next<T, U>() => (Next<T>(), Next<U>());
+        public static (T, U, V) Next<T, U, V>() => (Next<T>(), Next<U>(), Next<V>());
+        public static (T, U, V, W) Next<T, U, V, W>() => (Next<T>(), Next<U>(), Next<V>(), Next<W>());
+        public static (T, U, V, W, X) Next<T, U, V, W, X>() => (Next<T>(), Next<U>(), Next<V>(), Next<W>(), Next<X>());
+        public static T[] NextArray<T>(in int size) {
+            var ret = new T[size]; for (int i = 0; i < size; ++i) ret[i] = Next<T>(); return ret;
         }
-        public static T[,] next2DArray<T>(int n, in int m) {
+        public static T[,] Next2DArray<T>(int n, in int m) {
             var ret = new T[n, m];
-            for (int i = 0; i < n; ++i) for (int j = 0; j < m; ++j) ret[i, j] = next<T>(); return ret;
+            for (int i = 0; i < n; ++i) for (int j = 0; j < m; ++j) ret[i, j] = Next<T>(); return ret;
         }
-        public static (T[], U[]) nextArray<T, U>(in int size) {
+        public static (T[], U[]) NextArray<T, U>(in int size) {
             var ret1 = new T[size]; var ret2 = new U[size];
-            for (int i = 0; i < size; ++i) (ret1[i], ret2[i]) = next<T, U>();
+            for (int i = 0; i < size; ++i) (ret1[i], ret2[i]) = Next<T, U>();
             return (ret1, ret2);
         }
-        public static (T[], U[], V[]) nextArray<T, U, V>(in int size) {
+        public static (T[], U[], V[]) NextArray<T, U, V>(in int size) {
             var ret1 = new T[size]; var ret2 = new U[size]; var ret3 = new V[size];
-            for (int i = 0; i < size; ++i) (ret1[i], ret2[i], ret3[i]) = next<T, U, V>();
+            for (int i = 0; i < size; ++i) (ret1[i], ret2[i], ret3[i]) = Next<T, U, V>();
             return (ret1, ret2, ret3);
         }
-        public static (T[], U[], V[], W[]) nextArray<T, U, V, W>(in int size) {
+        public static (T[], U[], V[], W[]) NextArray<T, U, V, W>(in int size) {
             var ret1 = new T[size]; var ret2 = new U[size];
             var ret3 = new V[size]; var ret4 = new W[size];
-            for (int i = 0; i < size; ++i) (ret1[i], ret2[i], ret3[i], ret4[i]) = next<T, U, V, W>();
+            for (int i = 0; i < size; ++i) (ret1[i], ret2[i], ret3[i], ret4[i]) = Next<T, U, V, W>();
             return (ret1, ret2, ret3, ret4);
         }
     }
     public static class Output
     {
-        [MethodImpl(256)] public static void print() => Console.WriteLine();
-        [MethodImpl(256)] public static void print(in string s, bool endline = true) {
+        [MethodImpl(256)] public static void Print() => Console.WriteLine();
+        [MethodImpl(256)] public static void Print(in string s, bool endline = true) {
             if (endline) Console.WriteLine(s); else Console.Write(s);
         }
-        [MethodImpl(256)] public static void print(in char s, bool endline = true) {
+        [MethodImpl(256)] public static void Print(in char s, bool endline = true) {
             if (endline) Console.WriteLine(s); else Console.Write(s);
         }
-        [MethodImpl(256)] public static void print(in int v, bool endline = true) {
+        [MethodImpl(256)] public static void Print(in int v, bool endline = true) {
             if (endline) Console.WriteLine(v); else Console.Write(v);
         }
-        [MethodImpl(256)] public static void print(in long v, bool endline = true) {
+        [MethodImpl(256)] public static void Print(in long v, bool endline = true) {
             if (endline) Console.WriteLine(v); else Console.Write(v);
         }
-        [MethodImpl(256)] public static void print(in ulong v, bool endline = true) {
+        [MethodImpl(256)] public static void Print(in ulong v, bool endline = true) {
             if (endline) Console.WriteLine(v); else Console.Write(v);
         }
-        [MethodImpl(256)] public static void print(in bool b) => PrintBool(b);
-        [MethodImpl(256)] public static void print(in object v) => Console.WriteLine(v);
-        [MethodImpl(256)] public static void print<T>(in IEnumerable<T> array, string separator = " ") =>
+        [MethodImpl(256)] public static void Print(in bool b) => PrintBool(b);
+        [MethodImpl(256)] public static void Print(in object v) => Console.WriteLine(v);
+        [MethodImpl(256)] public static void Print<T>(in IEnumerable<T> array, string separator = " ") =>
             Console.WriteLine(array.Join(separator));
-        [MethodImpl(256)] public static void prints<T>(params T[] t) => print(t);
-        
+        [MethodImpl(256)] public static void MultiPrint<T>(params T[] t) => Print(t);
+
+        [MethodImpl(256)] public static void PrintExit(in string s, bool endline = true, int exitCode = 0) {
+            if (endline) Console.WriteLine(s); else Console.Write(s);
+            Environment.Exit(exitCode);
+        }
+        [MethodImpl(256)] public static void PrintExit(in char s, bool endline = true, int exitCode = 0) {
+            if (endline) Console.WriteLine(s); else Console.Write(s);
+            Environment.Exit(exitCode);
+        }
+        [MethodImpl(256)] public static void PrintExit(in int v, bool endline = true, int exitCode = 0) {
+            if (endline) Console.WriteLine(v); else Console.Write(v);
+            Environment.Exit(exitCode);
+        }
+        [MethodImpl(256)] public static void PrintExit(in long v, bool endline = true, int exitCode = 0) {
+            if (endline) Console.WriteLine(v); else Console.Write(v);
+            Environment.Exit(exitCode);
+        }
+        [MethodImpl(256)] public static void PrintExit(in ulong v, bool endline = true, int exitCode = 0) {
+            if (endline) Console.WriteLine(v); else Console.Write(v);
+            Environment.Exit(exitCode);
+        }
+        [MethodImpl(256)] public static void PrintExit(in bool b, int exitCode = 0) {
+            PrintBool(b);
+            Environment.Exit(exitCode);
+        }
+        [MethodImpl(256)] public static void PrintExit(in object v, int exitCode = 0) {
+            Console.WriteLine(v);
+            Environment.Exit(exitCode);
+        }
+        [MethodImpl(256)] public static void PrintExit<T>(in IEnumerable<T> array, string separator = " ", int exitCode = 0) {
+            Console.WriteLine(array.Join(separator));
+            Environment.Exit(exitCode);
+        }
+
 #if LOCAL
-        [MethodImpl(256)] public static void debug<T>(in T value, bool endline = true) {
-            if (endline) Console.WriteLine(value);else Console.Write(value);
+        [MethodImpl(256)] public static void DebugPrint<T>(in T value, bool endline = true) {
+            if (endline) Console.WriteLine(value); else Console.Write(value);
         }
 #else
-        public static void debug(params object[] obj) { }
+        public static void DebugPrint(params object[] obj) { }
 #endif
 
         [MethodImpl(256)] static void PrintBool(in bool val, in string yes = null, in string no = null) =>
-            print(val ? yes ?? _yes : no ?? _no);
+            Print(val ? yes ?? _yes : no ?? _no);
         static string _yes = "Yes", _no = "No";
 
         public static void SetYesNoString(in YesNoType t) => (_yes, _no) = YesNoString[t];
@@ -459,6 +513,7 @@ namespace Solve {
 
         static readonly Dictionary<YesNoType, (string yes, string no)>
             YesNoString = new Dictionary<YesNoType, (string, string)> {
+                    {YesNoType.Default, ("Yes", "No")},
                     {YesNoType.Yes_No, ("Yes", "No")},
                     {YesNoType.YES_NO, ("YES", "NO")},
                     {YesNoType.Upper, ("YES", "NO")},
@@ -471,20 +526,22 @@ namespace Solve {
         public static readonly (string yes, string no) YN_Possible = ("Possible", "Impossible"),
             YN_lower = ("yes", "no"), YN_upper = ("YES", "NO"), YN_Yay = ("Yay!", ":(");
 
-        public static void Yes() => print(_yes);
-        public static void No() => print(_no);
-
-        public static object cout { set => Console.WriteLine(value); }
-#if LOCAL
-        public static object dout { set => Console.WriteLine(value); }
-#else
-        public static object dout { set { } }
-#endif
-        public static object cerr { set => Console.Error.WriteLine(value); }
+        public static void Yes() => Print(_yes);
+        public static void No() => Print(_no);
+        [MethodImpl(256)] public static void YesExit(int exitCode = 0) {
+            Yes();
+            Console.Out.Flush();
+            Environment.Exit(exitCode);
+        }
+        [MethodImpl(256)] public static void NoExit(int exitCode = 0) {
+            No();
+            Console.Out.Flush();
+            Environment.Exit(exitCode);
+        }
 
         public const string endl = "\n";
 
-        public enum YesNoType { Yes_No, YES_NO, Upper, yes_no, Lower, Possible_Impossible, Yay }
+        public enum YesNoType { Default, Yes_No, YES_NO, Upper, yes_no, Lower, Possible_Impossible, Yay }
     }
     public class Program
     {
@@ -507,3 +564,4 @@ namespace Solve {
         public static readonly int[] dx = {-1, 0, 0, 1, -1, -1, 1, 1}, dy = {0, 1, -1, 0, -1, 1, -1, 1};
     }
 }
+ 

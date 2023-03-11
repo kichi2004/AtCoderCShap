@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
-using static Solve.Methods;
+using static Solve.Lib;
 
 namespace Solve.Libraries.SegmentTree.DualSegmentTree
 {

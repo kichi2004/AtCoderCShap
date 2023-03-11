@@ -1,9 +1,11 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Solve.Libraries.SegmentTree.SegmentTree
 {
-    public class SegmentTree<T>
+    public class SegmentTree<T> : IEnumerable<T>
     {
         readonly int _size;
         readonly T[] _seg;
@@ -95,5 +97,14 @@ namespace Solve.Libraries.SegmentTree.SegmentTree
         }
 
         public T this[int i] => _seg[i + _size];
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            for (int i = 0; i < _size; i++) yield return this[i];
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }

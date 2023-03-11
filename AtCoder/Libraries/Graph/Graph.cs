@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using static Solve.Methods;
+using static Solve.Lib;
 
 namespace Solve.Libraries.Graph.Graph
 {
@@ -28,7 +28,7 @@ namespace Solve.Libraries.Graph.Graph
         public WeightGraph(int n)
         {
             Graph = new List<WeightEdge>[n]; 
-            rep(n, i => Graph[i] = new List<WeightEdge>());
+            Repeat(n, i => Graph[i] = new List<WeightEdge>());
         }
         public int Length => Graph.Length;
         public List<WeightEdge> this[int i] => Graph[i];
@@ -37,7 +37,7 @@ namespace Solve.Libraries.Graph.Graph
         {
             while (m-- > 0)
             {
-                var (a, b, c) = Input.next<int, int, long>();
+                var (a, b, c) = Input.Next<int, int, long>();
                 a -= offset;
                 b -= offset;
                 Graph[a].Add(new WeightEdge(b, c));
@@ -64,16 +64,16 @@ namespace Solve.Libraries.Graph.Graph
         public UnweightGraph(int n)
         {
             Graph = new List<UnweightEdge>[n]; 
-            rep(n, i => Graph[i] = new List<UnweightEdge>());
+            Repeat(n, i => Graph[i] = new List<UnweightEdge>());
         }
         public int Length => Graph.Length;
         public List<UnweightEdge> this[int i] => Graph[i];
         public List<UnweightEdge>[] Graph { get; }
-        public void InputGraph(int m, in bool directed = true, in int offset = 1)
+        public void InputGraph(int m, in bool directed, in int offset = 1)
         {
             while (m-- > 0)
             {
-                var (a, b) = Input.next<int, int>();
+                var (a, b) = Input.Next<int, int>();
                 a -= offset;
                 b -= offset;
                 Graph[a].Add(new UnweightEdge(b));

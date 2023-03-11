@@ -18,7 +18,7 @@ namespace Solve.Libraries.Fact
             var lastFact = ModInt.ModInt.One;
             _fact = new int[N + 1];
             _fact[0] = 1;
-            Methods.rep1(N, i => {
+            Lib.RepeatClosed(N, i => {
                 lastFact *= i;
                 _fact[i] = lastFact.Value;
             });
@@ -26,7 +26,7 @@ namespace Solve.Libraries.Fact
             var lastInv = lastFact.Invert;
             _inv = new int[N + 1];
             _inv[N] = lastInv.Value;
-            Methods.repr(N, i => {
+            Lib.RepeatReverse(N, i => {
                 lastInv *= i + 1;
                 _inv[i] = lastInv.Value;
             });

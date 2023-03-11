@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Solve.Libraries.Graph.Graph;
 using Solve.Libraries.PriorityQueue;
-using static Solve.Methods;
+using static Solve.Lib;
 
 namespace Solve.Libraries.Graph.Dijkstra
 {

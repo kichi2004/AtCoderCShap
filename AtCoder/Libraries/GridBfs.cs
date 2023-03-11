@@ -100,7 +100,7 @@ namespace Solve.Libraries.GridBfs
 
             var queue = new Queue<(int y, int x)>();
             queue.Enqueue((sy, sx));
-            var ret = Methods.Array2D(H, W, -1);
+            var ret = Lib.Array2D(H, W, -1);
             ret[sy, sx] = 0;
             while (queue.Any()) {
                 var (y, x) = queue.Dequeue();
