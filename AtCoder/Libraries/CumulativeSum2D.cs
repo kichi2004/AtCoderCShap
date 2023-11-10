@@ -1,6 +1,5 @@
-using System;
-
-namespace Solve.Libraries.CumulativeSum2D {
+namespace Solve.Libraries.CumulativeSum2D
+{
     [Obsolete]
     public class CumulativeSum2D {
         public CumulativeSum2D(long[][] array) : this(array.To2DArray()) { }

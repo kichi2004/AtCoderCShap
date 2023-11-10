@@ -10,28 +10,31 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using static Solve.Input;
 using static Solve.Lib;
 using static Solve.Output;
 using static System.Math;
+using Range = System.Range;
 
 // Resharper restore RedundantUsingDirective
 using System;
 
-// ReSharper disable InconsistentNaming
+namespace Solve
+{
+    public record In;
 
-
-namespace Solve {
     public partial class Solver
     {
-        public void Main()
+        public void Main(In cin)
         {
             
         }
 
         public const long MOD = 998244353;
     }
+
 
     public static class Lib
     {
@@ -41,15 +44,14 @@ namespace Solve {
         [MethodImpl(256)] public static string JoinEndline<T>(this IEnumerable<T> source) => source.Join("\n");
         [MethodImpl(256)] public static string Join<T>(this IEnumerable<T> source, string s) => string.Join(s, source);
         [MethodImpl(256)] public static string Join<T>(this IEnumerable<T> source, char c) => string.Join(c.ToString(), source);
-        public static int Gcd(int a, int b) => (int) Gcd((long) a, b);
-        public static long Gcd(long a, long b) {
+        public static T Gcd<T>(T a, T b) where T : INumber<T> {
             while (true) {
                 if (a < b) (a, b) = (b, a);
-                if (a % b == 0) return b;
+                if (T.IsZero(a % b)) return b;
                 (a, b) = (b, a % b);
             }
         }
-        public static long Lcm(long a, long b) => a / Gcd(a, b) * b;
+        public static T Lcm<T>(T a, T b) where T : INumber<T> => a / Gcd(a, b) * b;
         public static bool IsPrime(long value) {
             if (value <= 1) return false;
             for (long i = 2; i * i <= value; ++i) if (value % i == 0) return false;
@@ -63,26 +65,20 @@ namespace Solve {
         public static int PowMod(long a, long b, int p) => (int) PowMod(a, b, (long) p);
         public static long PowMod(long a, long b, long p) {
             long res = 1;
-            while (b > 0) {
-                if (b % 2 != 0) 
-                    res = res * a % p;
-                a = a * a % p;
-                b >>= 1;
-            }
+            while (b > 0) { if (b % 2 != 0) res = res * a % p; a = a * a % p; b >>= 1; }
             return res;
         }
-        public static IEnumerable<long> Factors(long n) {
-            Assert(n >= 0, "n must be greater than 0.");
-            for (long i = 1; i * i <= n; ++i) {
-                var div = DivRem(n, i, out var rem);
-                if (rem > 0) continue;
+        public static IEnumerable<T> Factors<T>(T n) where T : INumber<T> {
+            Assert(T.IsPositive(n), "n must be greater than 0.");
+            for (var i = T.One; i * i <= n; ++i)
+            {
+                if (!T.IsZero(n % i)) continue;
+                var div = n / i;
                 yield return div;
                 if (i != div) yield return i;
             }
         }
-        public static IEnumerable<int> Factors(int n) => Factors((long) n).Select(Convert.ToInt32);
-        [MethodImpl(256)] public static int DivCeil(int a, int b) => (a + b - 1) / b;
-        [MethodImpl(256)] public static long DivCeil(long a, long b) => (a + b - 1) / b;
+        [MethodImpl(256)] public static T DivCeil<T>(T a, T b) where T : INumber<T> => (a + b - T.One) / b;
         public static IEnumerable<T[]> Permutations<T>(IEnumerable<T> src) {
             var ret = new List<T[]>();
             Search(ret, new Stack<T>(), src.ToArray());
@@ -153,11 +149,10 @@ namespace Solve {
         [MethodImpl(256)]
         public static IEnumerable<TResult> Repeat<TResult>(TResult value, int count) => Enumerable.Repeat(value, count);
         [MethodImpl(256)] public static string AsString(this IEnumerable<char> source) => new string(source.ToArray());
-        public static IEnumerable<long> CumulativeSum(this IEnumerable<long> source) {
-            long sum = 0; foreach (var item in source) yield return sum += item;
-        }
-        public static IEnumerable<int> CumulativeSum(this IEnumerable<int> source) {
-            int sum = 0; foreach (var item in source) yield return sum += item;
+        public static IEnumerable<T> CumulativeSum<T>(this IEnumerable<T> source)
+            where T : IAdditionOperators<T, T, T>, IAdditiveIdentity<T, T>
+        {
+            var sum = T.AdditiveIdentity; foreach (var item in source) yield return sum += item;
         }
         [MethodImpl(256)] public static bool IsIn<T>(this T value, T l, T r) where T : IComparable<T> =>
             l.CompareTo(r) > 0 ? throw new ArgumentException() : l.CompareTo(value) <= 0 && value.CompareTo(r) < 0;
@@ -215,6 +210,7 @@ namespace Solve {
         [MethodImpl(256)] public static bool ChangeToMax<T>(this ref T a, T b)
             where T : struct, IComparable<T> =>
             chmax(ref a, b);
+
         public static T[] InitArray<T>(int n, Func<int, T> init) {
             var res = new T[n];
             for (int i = 0; i < n; i++) res[i] = init(i);
@@ -318,10 +314,10 @@ namespace Solve {
     }
     public class Scanner<T> {
         public Scanner() {
-            _deconstructer = new Deconstructer(this);
+            _deconstructor = new Deconstructor(this);
         }
-        public readonly struct Deconstructer {
-            public Deconstructer(Scanner<T> scanner) => _sc = scanner;
+        public readonly struct Deconstructor {
+            public Deconstructor(Scanner<T> scanner) => _sc = scanner;
             
             readonly Scanner<T> _sc;
 
@@ -351,22 +347,28 @@ namespace Solve {
                     _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read(), _sc.Read());
         }
 
-        readonly Deconstructer _deconstructer;
+        private readonly Deconstructor _deconstructor;
 
-        public T next() => Read();
         public T Read() => Next<T>();
-        public Deconstructer ReadMulti() => _deconstructer;
+        public Deconstructor ReadMulti() => _deconstructor;
         IEnumerable<T> Enumerable(int N) {
             for (int i = 0; i < N; ++i) yield return Read();
         }
         public T[] ReadArray(in int N) => Enumerable(N).ToArray();
         public List<T> ReadList(in int N) => Enumerable(N).ToList();
-        public T[,] ReadArray2d(in int N, in int M) => Next2DArray<T>(N, M);
+        public T[,] ReadArray2d(in int N, in int M) => next2DArray<T>(N, M);
         public T[][] ReadListArray(in int n) {
             var ret = new T[n][];
             for (int i = 0; i < n; i++) ret[i] = ReadArray(Next<int>());
             return ret;
         }
+    }
+
+    [AttributeUsage(AttributeTargets.Parameter)]
+    class LengthAttribute : Attribute
+    {
+        public LengthAttribute(string len) => LengthName = len;
+        public string LengthName { get; }
     }
     public static class Input
     {
@@ -415,28 +417,98 @@ namespace Solve {
         public static (T, U, V) Next<T, U, V>() => (Next<T>(), Next<U>(), Next<V>());
         public static (T, U, V, W) Next<T, U, V, W>() => (Next<T>(), Next<U>(), Next<V>(), Next<W>());
         public static (T, U, V, W, X) Next<T, U, V, W, X>() => (Next<T>(), Next<U>(), Next<V>(), Next<W>(), Next<X>());
-        public static T[] NextArray<T>(in int size) {
+        public static T[] nextArray<T>(in int size) {
             var ret = new T[size]; for (int i = 0; i < size; ++i) ret[i] = Next<T>(); return ret;
         }
-        public static T[,] Next2DArray<T>(int n, in int m) {
+        public static T[,] next2DArray<T>(int n, in int m) {
             var ret = new T[n, m];
             for (int i = 0; i < n; ++i) for (int j = 0; j < m; ++j) ret[i, j] = Next<T>(); return ret;
         }
-        public static (T[], U[]) NextArray<T, U>(in int size) {
+        public static (T[], U[]) nextArray<T, U>(in int size) {
             var ret1 = new T[size]; var ret2 = new U[size];
             for (int i = 0; i < size; ++i) (ret1[i], ret2[i]) = Next<T, U>();
             return (ret1, ret2);
         }
-        public static (T[], U[], V[]) NextArray<T, U, V>(in int size) {
+        public static (T[], U[], V[]) nextArray<T, U, V>(in int size) {
             var ret1 = new T[size]; var ret2 = new U[size]; var ret3 = new V[size];
             for (int i = 0; i < size; ++i) (ret1[i], ret2[i], ret3[i]) = Next<T, U, V>();
             return (ret1, ret2, ret3);
         }
-        public static (T[], U[], V[], W[]) NextArray<T, U, V, W>(in int size) {
+        public static (T[], U[], V[], W[]) nextArray<T, U, V, W>(in int size) {
             var ret1 = new T[size]; var ret2 = new U[size];
             var ret3 = new V[size]; var ret4 = new W[size];
             for (int i = 0; i < size; ++i) (ret1[i], ret2[i], ret3[i], ret4[i]) = Next<T, U, V, W>();
             return (ret1, ret2, ret3, ret4);
+        }
+    
+    
+        public static T Read<T>() {
+            var type = typeof(T);
+            if ((!type.IsValueType || type.IsPrimitive || type.IsEnum) && !type.IsClass) throw new Exception("T must be a class.");
+
+            var constructor = type.GetConstructors()[0];
+            var ret = default(T);
+
+            object ReadInner(Type t) {
+                if (!t.FullName!.StartsWith("System.ValueTuple")) {
+                    var method = typeof(Input).GetMethods()
+                        .SingleOrDefault(method =>
+                            method.Name == nameof(Next) && method.GetGenericArguments().Length == 1
+                        )!.MakeGenericMethod(t);
+                    return method.Invoke(null, null);
+                }
+                var tupleTypes = t.GetGenericArguments();
+                if (tupleTypes.Length > 8) {
+                    throw new Exception("Tuple length must be less than 8.");
+                }
+                var tuple = new object[tupleTypes.Length];
+                for (int i = 0; i < tupleTypes.Length; i++) {
+                    tuple[i] = ReadInner(tupleTypes[i]);
+                }
+                return Activator.CreateInstance(t, tuple);
+            }
+
+            var param = new List<object>();
+            var dict = new Dictionary<string, object>();
+            foreach (var p in constructor.GetParameters()) {
+                var pt = p.ParameterType;
+                if (pt.IsArray) {
+                    var len = p.GetCustomAttribute<LengthAttribute>();
+                    if (len is null) {
+                        throw new Exception($"LengthAttribute for {p.Name} is not specified.");
+                    }
+                    if (!dict.ContainsKey(len.LengthName) || dict[len.LengthName] is not int length) {
+                        throw new Exception($"Type of {len.LengthName} must be int as length of {p.Name}.");
+                    }
+                    // if (len.Converter != null) length = len.Converter(length);
+                    var pt2 = pt.GetElementType()!;
+                    var array = Array.CreateInstance(pt2, length);
+                    for (int i = 0; i < length; i++) {
+                        array.SetValue(ReadInner(pt2), i);
+                    }
+                    param.Add(array);
+                    continue;
+                }
+                if (pt.FullName!.StartsWith("System.Collections.Generic.List`1")) {
+                    var pt2 = pt.GenericTypeArguments[0];
+                    var length = (int) ReadInner(typeof(int));
+                    var array = Array.CreateInstance(pt2, length);
+                    for (int i = 0; i < length; i++) {
+                        array.SetValue(ReadInner(pt2), i);
+                    }
+                    var toList = typeof(Enumerable)
+                        .GetMethod("ToList", BindingFlags.Public | BindingFlags.Static)!
+                        .MakeGenericMethod(pt2);
+                
+                    param.Add(Activator.CreateInstance(pt, array));
+                    continue;
+                }
+
+                var value = ReadInner(pt);
+                param.Add(value);
+                dict[p.Name ?? "(null)"] = value;
+            }
+            return (T) constructor.Invoke(param.ToArray());
         }
     }
     public static class Output
@@ -501,7 +573,7 @@ namespace Solve {
             if (endline) Console.WriteLine(value); else Console.Write(value);
         }
 #else
-        public static void DebugPrint(params object[] obj) { }
+        public static void debug(params object[] obj) { }
 #endif
 
         [MethodImpl(256)] static void PrintBool(in bool val, in string yes = null, in string no = null) =>
@@ -513,15 +585,15 @@ namespace Solve {
 
         static readonly Dictionary<YesNoType, (string yes, string no)>
             YesNoString = new Dictionary<YesNoType, (string, string)> {
-                    {YesNoType.Default, ("Yes", "No")},
-                    {YesNoType.Yes_No, ("Yes", "No")},
-                    {YesNoType.YES_NO, ("YES", "NO")},
-                    {YesNoType.Upper, ("YES", "NO")},
-                    {YesNoType.yes_no, ("yes", "no")},
-                    {YesNoType.Lower, ("yes", "no")},
-                    {YesNoType.Possible_Impossible, ("Possible", "Impossible")},
-                    {YesNoType.Yay, ("Yay!", ":(")},
-                };
+                {YesNoType.Default, ("Yes", "No")},
+                {YesNoType.Yes_No, ("Yes", "No")},
+                {YesNoType.YES_NO, ("YES", "NO")},
+                {YesNoType.Upper, ("YES", "NO")},
+                {YesNoType.yes_no, ("yes", "no")},
+                {YesNoType.Lower, ("yes", "no")},
+                {YesNoType.Possible_Impossible, ("Possible", "Impossible")},
+                {YesNoType.Yay, ("Yay!", ":(")},
+            };
 
         public static readonly (string yes, string no) YN_Possible = ("Possible", "Impossible"),
             YN_lower = ("yes", "no"), YN_upper = ("YES", "NO"), YN_Yay = ("Yay!", ":(");
@@ -548,20 +620,18 @@ namespace Solve {
         public static void Main(string[] args) {
             var sw = new StreamWriter(Console.OpenStandardOutput()) {AutoFlush = false};
             Console.SetOut(sw);
-            new Solver().Main();
+            new Solver().Main(Read<In>());
             Console.Out.Flush();
         }
     }
     partial class Solver
     {
-        readonly Scanner<int> Int;
-        readonly Scanner<long> Long;
-        readonly Scanner<string> String;
-        public Solver() => (Int, String, Long) = (new Scanner<int>(), new Scanner<string>(), new Scanner<long>());
+        private Scanner<int> Int { get; } = new();
+        private Scanner<long> Long { get; } = new();
+        private Scanner<string> String { get; } = new();
         const int INF = 1000000010;
         const long LINF = 1000000000000000100;
         const double EPS = 1e-8;
         public static readonly int[] dx = {-1, 0, 0, 1, -1, -1, 1, 1}, dy = {0, 1, -1, 0, -1, 1, -1, 1};
     }
 }
- 

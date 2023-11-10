@@ -1,6 +1,3 @@
-using System;
-using Solve.Libraries.ModInt;
-
 namespace Solve.Libraries.Fact
 {
     public class Fact

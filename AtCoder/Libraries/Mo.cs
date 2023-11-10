@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Solve.Libraries.Mo
+﻿namespace Solve.Libraries.Mo
 {
     public abstract class Mo
     {
@@ -9,7 +6,7 @@ namespace Solve.Libraries.Mo
 
         int Width { get; }
 
-        public Mo(int width) {
+        protected Mo(int width) {
             Width = width;
             Queries = new List<(int left, int right)>();
         }

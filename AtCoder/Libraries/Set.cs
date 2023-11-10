@@ -1,12 +1,11 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using Solve.Libraries.BinarySearchTreeUtils;
 
-namespace Solve.Libraries.Set {
+namespace Solve.Libraries.Set
+{
     public class Set<T> : IEnumerable<T> where T : IComparable {
         
-        protected BinarySearchTree<T>.Node _root;
+        protected BinarySearchTree<T>.Node? _root;
 
         public T this[int idx] => ElementAt(idx);
 

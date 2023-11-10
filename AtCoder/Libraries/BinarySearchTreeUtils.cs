@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-
-namespace Solve.Libraries.BinarySearchTreeUtils {
+namespace Solve.Libraries.BinarySearchTreeUtils
+{
     public static class RandomWrapper {
         public static readonly Random Rnd = new Random();
         public static double NextDouble() => Rnd.NextDouble();
@@ -10,8 +8,8 @@ namespace Solve.Libraries.BinarySearchTreeUtils {
     public static class BinarySearchTree<T> where T : IComparable {
         public class Node {
             public T Value;
-            public Node LChild;
-            public Node RChild;
+            public Node? LChild;
+            public Node? RChild;
             public int SubTreeCount;
 
             public Node(T v) {
@@ -21,14 +19,14 @@ namespace Solve.Libraries.BinarySearchTreeUtils {
         }
 
 
-        public static int Count(Node t) { return t?.SubTreeCount ?? 0; }
+        public static int Count(Node? t) { return t?.SubTreeCount ?? 0; }
 
         static Node Update(Node t) {
             t.SubTreeCount = Count(t.LChild) + Count(t.RChild) + 1;
             return t;
         }
 
-        public static Node Merge(Node l, Node r) {
+        public static Node? Merge(Node? l, Node? r) {
             if (l == null || r == null) return l ?? r;
 
             if (Count(l) / (double) (Count(l) + Count(r)) > RandomWrapper.NextDouble()) {
@@ -40,7 +38,7 @@ namespace Solve.Libraries.BinarySearchTreeUtils {
             }
         }
 
-        public static (Node, Node) Split(Node t, int k) {
+        public static (Node?, Node?) Split(Node? t, int k) {
             if (t == null) return (null, null);
             if (k <= Count(t.LChild)) {
                 var s = Split(t.LChild, k);
@@ -53,20 +51,20 @@ namespace Solve.Libraries.BinarySearchTreeUtils {
             }
         }
 
-        public static Node Remove(Node t, T v) {
+        public static Node? Remove(Node? t, T v) {
             if (Find(t, v) == null) return t;
             return RemoveAt(t, LowerBound(t, v));
         }
 
-        public static Node RemoveAt(Node t, int k) {
+        public static Node? RemoveAt(Node? t, int k) {
             var s = Split(t, k);
             var s2 = Split(s.Item2, 1);
             return Merge(s.Item1, s2.Item2);
         }
 
-        public static bool Contains(Node t, T v) { return Find(t, v) != null; }
+        public static bool Contains(Node? t, T v) { return Find(t, v) != null; }
 
-        public static Node Find(Node t, T v) {
+        public static Node? Find(Node? t, T v) {
             while (t != null) {
                 var cmp = t.Value.CompareTo(v);
                 if (cmp > 0) t = t.LChild;
@@ -77,7 +75,7 @@ namespace Solve.Libraries.BinarySearchTreeUtils {
             return t;
         }
 
-        public static Node FindByIndex(Node t, int idx) {
+        public static Node? FindByIndex(Node? t, int idx) {
             if (t == null) return null;
 
             var currentIdx = Count(t) - Count(t.RChild) - 1;
@@ -95,7 +93,7 @@ namespace Solve.Libraries.BinarySearchTreeUtils {
             return null;
         }
 
-        public static int UpperBound(Node t, T v) {
+        public static int UpperBound(Node? t, T v) {
             var torg = t;
             if (t == null) return -1;
 
@@ -117,7 +115,7 @@ namespace Solve.Libraries.BinarySearchTreeUtils {
             return ret == int.MaxValue ? Count(torg) : ret;
         }
 
-        public static int LowerBound(Node t, T v) {
+        public static int LowerBound(Node? t, T v) {
             var torg = t;
             if (t == null) return -1;
 
@@ -140,23 +138,23 @@ namespace Solve.Libraries.BinarySearchTreeUtils {
             return ret == int.MaxValue ? Count(torg) : ret;
         }
 
-        public static Node Insert(Node t, T v) {
+        public static Node? Insert(Node? t, T v) {
             var ub = LowerBound(t, v);
             return InsertByIdx(t, ub, v);
         }
 
-        static Node InsertByIdx(Node t, int k, T v) {
+        static Node? InsertByIdx(Node? t, int k, T v) {
             var s = Split(t, k);
             return Merge(Merge(s.Item1, new Node(v)), s.Item2);
         }
 
-        public static IEnumerable<T> Enumerate(Node t) {
+        public static IEnumerable<T> Enumerate(Node? t) {
             var ret = new List<T>();
             Enumerate(t, ret);
             return ret;
         }
 
-        static void Enumerate(Node t, List<T> ret) {
+        static void Enumerate(Node? t, List<T> ret) {
             if (t == null) return;
             Enumerate(t.LChild, ret);
             ret.Add(t.Value);

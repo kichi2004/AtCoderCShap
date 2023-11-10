@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 
-namespace AtCoder.Libraries.MyArray
+namespace AtCoder.Libraries.Mo.MyArray
 {
     public class Sequence<T> : IEnumerable<T>, IList<T>
     {

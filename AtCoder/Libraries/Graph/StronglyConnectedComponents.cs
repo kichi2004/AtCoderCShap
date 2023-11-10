@@ -1,10 +1,9 @@
-using System.Collections.Generic;
-using System.Linq;
 using Solve.Libraries.Graph.Graph;
 
-namespace Solve.Libraries.Graph.StronglyConnectedComponents {
+namespace Solve.Libraries.Graph.StronglyConnectedComponents
+{
     // https://github.com/st1011/CompetitiveProgramming-CSharp/blob/master/src/CompetitiveProgramming/Utils/StronglyConnexctedComponents.cs
-    
+
     /// <summary>
     /// 強連結成分分解
     /// </summary>
